@@ -1,0 +1,29 @@
+# Compiled binaries
+*.exe
+*.out
+*.o
+*.obj
+
+# Data files (keep the folder, ignore generated files)
+data/patients.csv
+data/treated.csv
+data/id_counter.txt
+
+# IDE files
+.vscode/
+*.code-workspace
+*.suo
+*.user
+*.sln.docstates
+
+# Build directories
+build/
+Release/
+Debug/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini

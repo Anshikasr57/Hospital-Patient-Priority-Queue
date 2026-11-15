@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hospital Patient Priority Queue</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════ SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <span class="brand-icon">🏥</span>
+    <div>
+      <div class="brand-title">MediQueue</div>
+      <div class="brand-sub">Priority Queue System</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" onclick="showPanel('register')" id="nav-register">
+      <span class="nav-icon">➕</span> Register Patient
+    </button>
+    <button class="nav-btn" onclick="showPanel('queue')" id="nav-queue">
+      <span class="nav-icon">📋</span> Patient Queue
+    </button>
+    <button class="nav-btn" onclick="showPanel('treat')" id="nav-treat">
+      <span class="nav-icon">💊</span> Treat Next
+    </button>
+    <button class="nav-btn" onclick="showPanel('search')" id="nav-search">
+      <span class="nav-icon">🔍</span> Search Patient
+    </button>
+    <button class="nav-btn" onclick="showPanel('update')" id="nav-update">
+      <span class="nav-icon">✏️</span> Update Priority
+    </button>
+    <button class="nav-btn" onclick="showPanel('remove')" id="nav-remove">
+      <span class="nav-icon">🗑️</span> Remove Patient
+    </button>
+    <button class="nav-btn" onclick="showPanel('stats')" id="nav-stats">
+      <span class="nav-icon">📊</span> Statistics
+    </button>
+    <button class="nav-btn" onclick="showPanel('history')" id="nav-history">
+      <span class="nav-icon">🏷️</span> Treated History
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="stat-pill"><span id="sb-waiting">0</span> Waiting</div>
+    <div class="stat-pill treated"><span id="sb-treated">0</span> Treated</div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════════════════════ MAIN -->
+<main class="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <span class="topbar-title" id="page-title">Register New Patient</span>
+    </div>
+    <div class="topbar-right" id="next-patient-bar">
+      <span class="next-label">Next in Queue:</span>
+      <span class="next-name" id="next-name">—</span>
+      <span class="next-badge" id="next-badge"></span>
+    </div>
+  </header>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ─── PANEL: Register ─── -->
+  <section class="panel active" id="panel-register">
+    <div class="card">
+      <div class="card-header">
+        <h2>🧑‍⚕️ Register New Patient</h2>
+        <p>Fill in the patient details to add them to the priority queue.</p>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Patient ID <span class="auto-tag">Auto</span></label>
+          <input type="text" id="reg-id" readonly placeholder="Auto-generated"/>
+        </div>
+        <div class="form-group">
+          <label>Full Name <span class="req">*</span></label>
+          <input type="text" id="reg-name" placeholder="e.g. Alice Smith" maxlength="60"/>
+        </div>
+        <div class="form-group">
+          <label>Age <span class="req">*</span></label>
+          <input type="number" id="reg-age" placeholder="0–150" min="0" max="150"/>
+        </div>
+        <div class="form-group full-width">
+          <label>Medical Complaint <span class="req">*</span></label>
+          <input type="text" id="reg-complaint" placeholder="Describe the complaint" maxlength="100"/>
+        </div>
+        <div class="form-group full-width">
+          <label>Urgency Level <span class="req">*</span></label>
+          <div class="urgency-selector">
+            <label class="urgency-opt" data-level="5">
+              <input type="radio" name="urgency" value="5"/>
+              <div class="urgency-card u5">
+                <span class="u-num">5</span>
+                <span class="u-label">Critical</span>
+                <span class="u-desc">Life-threatening</span>
+              </div>
+            </label>
+            <label class="urgency-opt" data-level="4">
+              <input type="radio" name="urgency" value="4"/>
+              <div class="urgency-card u4">
+                <span class="u-num">4</span>
+                <span class="u-label">High</span>
+                <span class="u-desc">Severe pain</span>
+              </div>
+            </label>
+            <label class="urgency-opt" data-level="3">
+              <input type="radio" name="urgency" value="3"/>
+              <div class="urgency-card u3">
+                <span class="u-num">3</span>
+                <span class="u-label">Moderate</span>
+                <span class="u-desc">Stable, needs care</span>
+              </div>
+            </label>
+            <label class="urgency-opt" data-level="2">
+              <input type="radio" name="urgency" value="2"/>
+              <div class="urgency-card u2">
+                <span class="u-num">2</span>
+                <span class="u-label">Low</span>
+                <span class="u-desc">Non-urgent</span>
+              </div>
+            </label>
+            <label class="urgency-opt" data-level="1">
+              <input type="radio" name="urgency" value="1"/>
+              <div class="urgency-card u1">
+                <span class="u-num">1</span>
+                <span class="u-label">Minor</span>
+                <span class="u-desc">Very minor issue</span>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" onclick="registerPatient()">➕ Register Patient</button>
+        <button class="btn btn-ghost" onclick="clearRegisterForm()">Clear</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Queue ─── -->
+  <section class="panel" id="panel-queue">
+    <div class="card">
+      <div class="card-header flex-between">
+        <div>
+          <h2>📋 Patient Priority Queue</h2>
+          <p>Patients ordered by urgency level, then arrival time (FIFO).</p>
+        </div>
+        <button class="btn btn-sm btn-outline" onclick="renderQueue()">↻ Refresh</button>
+      </div>
+      <div id="queue-empty" class="empty-state" style="display:none">
+        <div class="empty-icon">🏁</div>
+        <div>No patients currently waiting in the queue.</div>
+      </div>
+      <div class="table-wrap" id="queue-table-wrap">
+        <table class="data-table" id="queue-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Urgency</th>
+              <th>Complaint</th>
+              <th>Arrival</th>
+            </tr>
+          </thead>
+          <tbody id="queue-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Treat ─── -->
+  <section class="panel" id="panel-treat">
+    <div class="card">
+      <div class="card-header">
+        <h2>💊 Treat Next Patient</h2>
+        <p>Removes the highest-priority patient and marks them as treated.</p>
+      </div>
+      <div id="treat-preview" class="treat-preview"></div>
+      <div class="form-actions" style="margin-top:1.5rem">
+        <button class="btn btn-danger" onclick="treatNext()">💊 Treat Now (Extract Max)</button>
+      </div>
+      <div class="heap-note">
+        <strong>Heap Op:</strong> extractMax() → swap root with last → pop → heapifyDown() → <code>O(log n)</code>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Search ─── -->
+  <section class="panel" id="panel-search">
+    <div class="card">
+      <div class="card-header">
+        <h2>🔍 Search Patient</h2>
+        <p>Search by Patient ID in the waiting queue or treated history.</p>
+      </div>
+      <div class="search-row">
+        <input type="text" id="search-id" placeholder="Enter Patient ID, e.g. P001" class="search-input"/>
+        <button class="btn btn-primary" onclick="searchPatient()">🔍 Search</button>
+      </div>
+      <div id="search-result" class="search-result"></div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Update ─── -->
+  <section class="panel" id="panel-update">
+    <div class="card">
+      <div class="card-header">
+        <h2>✏️ Update Patient Priority</h2>
+        <p>Change a waiting patient's urgency level. Heap will be reorganized.</p>
+      </div>
+      <div class="search-row">
+        <input type="text" id="update-id" placeholder="Enter Patient ID, e.g. P002" class="search-input"/>
+        <button class="btn btn-primary" onclick="loadPatientForUpdate()">Load Patient</button>
+      </div>
+      <div id="update-current" class="search-result"></div>
+      <div id="update-form" style="display:none" class="update-form">
+        <label class="form-label">Select New Urgency Level:</label>
+        <div class="urgency-selector">
+          <label class="urgency-opt" data-level="5">
+            <input type="radio" name="update-urgency" value="5"/>
+            <div class="urgency-card u5"><span class="u-num">5</span><span class="u-label">Critical</span></div>
+          </label>
+          <label class="urgency-opt" data-level="4">
+            <input type="radio" name="update-urgency" value="4"/>
+            <div class="urgency-card u4"><span class="u-num">4</span><span class="u-label">High</span></div>
+          </label>
+          <label class="urgency-opt" data-level="3">
+            <input type="radio" name="update-urgency" value="3"/>
+            <div class="urgency-card u3"><span class="u-num">3</span><span class="u-label">Moderate</span></div>
+          </label>
+          <label class="urgency-opt" data-level="2">
+            <input type="radio" name="update-urgency" value="2"/>
+            <div class="urgency-card u2"><span class="u-num">2</span><span class="u-label">Low</span></div>
+          </label>
+          <label class="urgency-opt" data-level="1">
+            <input type="radio" name="update-urgency" value="1"/>
+            <div class="urgency-card u1"><span class="u-num">1</span><span class="u-label">Minor</span></div>
+          </label>
+        </div>
+        <div class="form-actions" style="margin-top:1rem">
+          <button class="btn btn-primary" onclick="applyUpdate()">✏️ Update Priority</button>
+          <button class="btn btn-ghost" onclick="cancelUpdate()">Cancel</button>
+        </div>
+        <div class="heap-note">
+          <strong>Heap Op:</strong> Find by ID O(n) → update key → heapifyUp() + heapifyDown() → <code>O(log n)</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Remove ─── -->
+  <section class="panel" id="panel-remove">
+    <div class="card">
+      <div class="card-header">
+        <h2>🗑️ Remove Patient</h2>
+        <p>Remove a waiting patient by ID. Heap property is restored after removal.</p>
+      </div>
+      <div class="search-row">
+        <input type="text" id="remove-id" placeholder="Enter Patient ID, e.g. P003" class="search-input"/>
+        <button class="btn btn-primary" onclick="loadPatientForRemove()">Load Patient</button>
+      </div>
+      <div id="remove-current" class="search-result"></div>
+      <div id="remove-confirm" style="display:none">
+        <div class="form-actions" style="margin-top:1rem">
+          <button class="btn btn-danger" onclick="confirmRemove()">🗑️ Confirm Remove</button>
+          <button class="btn btn-ghost" onclick="cancelRemove()">Cancel</button>
+        </div>
+        <div class="heap-note">
+          <strong>Heap Op:</strong> Find by ID O(n) → swap with last → pop → heapifyUp() + heapifyDown() → <code>O(log n)</code>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: Stats ─── -->
+  <section class="panel" id="panel-stats">
+    <div class="card">
+      <div class="card-header">
+        <h2>📊 Hospital Statistics</h2>
+        <p>Overview of patient counts and urgency distribution.</p>
+      </div>
+      <div class="stats-grid" id="stats-grid"></div>
+      <div class="stats-bars" id="stats-bars"></div>
+    </div>
+  </section>
+
+  <!-- ─── PANEL: History ─── -->
+  <section class="panel" id="panel-history">
+    <div class="card">
+      <div class="card-header flex-between">
+        <div>
+          <h2>🏷️ Treated Patients History</h2>
+          <p>All patients who have been treated, in order of treatment.</p>
+        </div>
+        <button class="btn btn-sm btn-danger-outline" onclick="clearHistory()">Clear History</button>
+      </div>
+      <div id="history-empty" class="empty-state" style="display:none">
+        <div class="empty-icon">📭</div>
+        <div>No patients have been treated yet.</div>
+      </div>
+      <div class="table-wrap" id="history-table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Urgency</th>
+              <th>Complaint</th>
+              <th>Treated At</th>
+            </tr>
+          </thead>
+          <tbody id="history-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="heap.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
